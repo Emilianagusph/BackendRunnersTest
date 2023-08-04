@@ -71,6 +71,7 @@ export const payFee = async (req, res) => {
   const { feeID } = body;
   const fee = await Fee.findOne({ _id: feeID }).exec(); //Obtengo toda la información de la cuota ingresada
 
+  
   try {
     var now = new Date(); //fecha actual
     var expireDate = new Date(fee.expireDate); //fecha de vencimiento de la cuota
@@ -158,7 +159,7 @@ export const receiveWebhook = async (req, res) => {
   const feeID = req.feeID;
 
   //Obtengo toda la info de la cuota ingresada
-  const feeInfo = await Fee.findById(lastInsertID).exec();
+  const feeInfo = await Fee.findById(feeID).exec();
   const feeSaleID = feeInfo.sale;
   const numFee = feeInfo.numFee;
 
