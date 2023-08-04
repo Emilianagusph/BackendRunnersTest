@@ -161,12 +161,13 @@ export const receiveWebhook = async (req, res) => {
   const feeInfo = await Fee.find({ _id: feeID }).exec();
   const feeSaleID = feeInfo.sale;
   const numFee = feeInfo.numFee;
-
+  res.send(feeID);
   try {
     //Si el pago fue correcto
     if (payment.type === "payment") {
       const data = await mercadopago.payment.findById(payment["data.id"]);
       console.log(data);
+      res.send(data);
       //Establezco los filtros y los parámetros a actualizar
       //Cambio los valores de la cuota ingresada: isActive -> false (deshabilita el boton pagar), isPayed -> true (fue pagada.)
       const filterActual = { _id: feeID, sale: feeSaleID };
