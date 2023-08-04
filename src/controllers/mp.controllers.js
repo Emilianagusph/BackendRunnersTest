@@ -119,9 +119,9 @@ export const payFee = async (req, res) => {
           },
         ],
         back_urls: {
-          success: "https://www.puntotrail.com/finalizacion",
-          failure: "https://www.puntotrail.com/inscription",
-          pending: "https://www.puntotrail.com/inscription",
+          success: "http://127.0.0.1:5173/finalizacion",
+          failure: "http://127.0.0.1:5173/inscription",
+          pending: "http://127.0.0.1:5173/inscription",
         },
         auto_return: "approved",
         notification_url: `https://backend-runners-test.vercel.app/api/payment/webhookMP/:${feeID}`,
