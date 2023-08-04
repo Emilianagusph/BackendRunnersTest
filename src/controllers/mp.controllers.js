@@ -71,7 +71,6 @@ export const payFee = async (req, res) => {
   const { feeID } = body;
   const fee = await Fee.findOne({ _id: feeID }).exec(); //Obtengo toda la información de la cuota ingresada
 
-  
   try {
     var now = new Date(); //fecha actual
     var expireDate = new Date(fee.expireDate); //fecha de vencimiento de la cuota
@@ -159,7 +158,7 @@ export const receiveWebhook = async (req, res) => {
   const feeID = req.feeID;
 
   //Obtengo toda la info de la cuota ingresada
-  const feeInfo = await Fee.findById(feeID).exec();
+  const feeInfo = await Fee.find({ _id: feeID }).exec();
   const feeSaleID = feeInfo.sale;
   const numFee = feeInfo.numFee;
 
@@ -168,23 +167,22 @@ export const receiveWebhook = async (req, res) => {
     if (payment.type === "payment") {
       const data = await mercadopago.payment.findById(payment["data.id"]);
       console.log(data);
+      //Establezco los filtros y los parámetros a actualizar
+      //Cambio los valores de la cuota ingresada: isActive -> false (deshabilita el boton pagar), isPayed -> true (fue pagada.)
+      const filterActual = { _id: feeID, sale: feeSaleID };
+      const updateActual = { isActive: false, isPayed: true };
+      const actualFee = await Fee.findOneAndUpdate(filterActual, updateActual);
+
+      //Cambio los valores de la cuota siguiente: isActive -> true (habilita el boton pagar), isPayed -> false (no fue pagada.)
+
+      const filterNext = { sale: feeSaleID, numFee: numFee + 1 };
+      const updateNext = { isActive: true, isPayed: false };
+      const nextFee = await Fee.findOneAndUpdate(filterNext, updateNext);
+
+      //Devuelvo las respuestas
+      res.sendStatus(204);
+      return res.json(actualFee, nextFee);
     }
-
-    //Establezco los filtros y los parámetros a actualizar
-    //Cambio los valores de la cuota ingresada: isActive -> false (deshabilita el boton pagar), isPayed -> true (fue pagada.)
-    const filterActual = { _id: feeID, sale: feeSaleID };
-    const updateActual = { isActive: false, isPayed: true };
-    const actualFee = await Fee.findOneAndUpdate(filterActual, updateActual);
-
-    //Cambio los valores de la cuota siguiente: isActive -> true (habilita el boton pagar), isPayed -> false (no fue pagada.)
-
-    const filterNext = { sale: feeSaleID, numFee: numFee + 1 };
-    const updateNext = { isActive: true, isPayed: false };
-    const nextFee = await Fee.findOneAndUpdate(filterNext, updateNext);
-
-    //Devuelvo las respuestas
-    res.sendStatus(204);
-    return res.json(actualFee, nextFee);
   } catch (error) {
     console.log(error);
     return res.sendStatus(500).json({ error: error.message });
