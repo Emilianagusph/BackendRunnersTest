@@ -174,14 +174,17 @@ export const receiveWebhook = async (req, res) => {
       const updateActual = { isActive: false, isPayed: true };
       const actualFee = await Fee.findOneAndUpdate(filterActual, updateActual);
 
+      await actualFee.save();
       //Cambio los valores de la cuota siguiente: isActive -> true (habilita el boton pagar), isPayed -> false (no fue pagada.)
 
       const filterNext = { sale: feeSaleID, numFee: numFee + 1 };
       const updateNext = { isActive: true, isPayed: false };
       const nextFee = await Fee.findOneAndUpdate(filterNext, updateNext);
 
+      await nextFee.save();
       //Devuelvo las respuestas
       res.sendStatus(204);
+
       return res.json(actualFee, nextFee);
     }
   } catch (error) {
