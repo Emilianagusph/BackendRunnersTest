@@ -124,7 +124,7 @@ export const payFee = async (req, res) => {
           pending: "http://127.0.0.1:5173/inscription",
         },
         auto_return: "approved",
-        notification_url: `https://backend-runners-test.vercel.app/api/payment/webhookMP/:${feeID}`,
+        notification_url: `https://backend-runners-test.vercel.app/api/payment/webhookMP/:${fee._id}`,
         date_of_expiration: json_linkExpireDate,
       };
 
@@ -155,7 +155,7 @@ export const payFee = async (req, res) => {
 //Función que se ejecuta después de realizar el pago del link generado anteriormente, recibe el body enviado por el script de MP y el ID de la cuota.
 export const receiveWebhook = async (req, res) => {
   const payment = req.query;
-  const feeID = req.feeID;
+  const feeID = req.params.feeID;
 
   //Obtengo toda la info de la cuota ingresada
   const feeInfo = await Fee.find({ _id: feeID }).exec();
