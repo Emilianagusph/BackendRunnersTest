@@ -124,7 +124,7 @@ export const payFee = async (req, res) => {
           pending: "http://127.0.0.1:5173/inscription",
         },
         auto_return: "approved",
-        notification_url: `https://backend-runners-test.vercel.app/api/payment/webhookMP/:${fee._id}`,
+        notification_url: `https://backend-runners-test.vercel.app/api/payment/webhookMP/:${feeID}`,
         date_of_expiration: json_linkExpireDate,
       };
 
@@ -165,6 +165,9 @@ export const receiveWebhook = async (req, res) => {
   try {
     //Si el pago fue correcto
     if (payment.type === "payment") {
+      if (payment.state === "approved") {
+        
+      }
       const data = await mercadopago.payment.findById(payment["data.id"]);
       console.log(data);
       res.send(data);
