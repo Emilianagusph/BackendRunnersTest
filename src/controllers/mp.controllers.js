@@ -124,7 +124,7 @@ export const payFee = async (req, res) => {
           pending: "http://127.0.0.1:5173/inscription",
         },
         auto_return: "approved",
-        notification_url: `https://backend-runners-test.vercel.app/api/payment/webhookMP/:${feeID}`,
+        notification_url: `https://cf93-190-31-81-90.ngrok.io/api/payment/webhookMP/${fee._id}`,
         date_of_expiration: json_linkExpireDate,
       };
 
@@ -163,29 +163,27 @@ export const receiveWebhook = async (req, res) => {
   try {
     //Si el pago fue correcto
     if (payment.type === "payment") {
-      if (payment.state === "approved") {
+      const data = await mercadopago.payment.findById(payment["data.id"]);
+      console.log(data);
+      res.send(data);
+      //Establezco los filtros y los parámetros a actualizar
+      //Cambio los valores de la cuota ingresada: isActive -> false (deshabilita el boton pagar), isPayed -> true (fue pagada.)
+      const filterActual = { _id: feeID, sale: feeSaleID };
+      const updateActual = { isActive: false, isPayed: true };
+      const actualFee = await Fee.findOneAndUpdate(filterActual, updateActual);
 
-        // const data = await mercadopago.payment.findById(payment["data.id"]);
-        //Establezco los filtros y los parámetros a actualizar
-        //Cambio los valores de la cuota ingresada: isActive -> false (deshabilita el boton pagar), isPayed -> true (fue pagada.)
-        const filterActual = { _id: feeID, sale: feeSaleID };
-        const updateActual = { isActive: false, isPayed: true };
-        const actualFee = await Fee.findOneAndUpdate(
-          filterActual,
-          updateActual
-        );
-        //await actualFee.save();
-        //Cambio los valores de la cuota siguiente: isActive -> true (habilita el boton pagar), isPayed -> false (no fue pagada.)
+      await actualFee.save();
+      //Cambio los valores de la cuota siguiente: isActive -> true (habilita el boton pagar), isPayed -> false (no fue pagada.)
 
-        const filterNext = { sale: feeSaleID, numFee: numFee + 1 };
-        const updateNext = { isActive: true, isPayed: false };
-        const nextFee = await Fee.findOneAndUpdate(filterNext, updateNext);
-        //await nextFee.save();
-        //Devuelvo las respuestas
-        return res.sendStatus(200);
-      }else{
-        return res.sendStatus(400).json({error: "El pago no ha sido aprobado."})
-      }
+      const filterNext = { sale: feeSaleID, numFee: numFee + 1 };
+      const updateNext = { isActive: true, isPayed: false };
+      const nextFee = await Fee.findOneAndUpdate(filterNext, updateNext);
+
+      await nextFee.save();
+      //Devuelvo las respuestas
+      res.sendStatus(204);
+
+      return res.json(actualFee, nextFee);
     }
   } catch (error) {
     console.log(error);
