@@ -38,6 +38,6 @@ export const test = async (req, res) => {
     headers: { "Content-Type": "application/json" },
   });
 
-  console.log(response.json());
-  res.send(response.json());
+  // console.log(response.json());
+  res.send(response.JSON());
 };
